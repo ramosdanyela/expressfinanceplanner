@@ -94,4 +94,29 @@ userRouter.get("/profile", isAuth, attachCurrentUser, async (req, res) => {
   }
 });
 
+userRouter.put("/editprofile", isAuth, attachCurrentUser, async (req, res) => {
+  try {
+    const loggedUser = req.currentUser;
+
+    console.log(req.currentUser);
+
+    if (!loggedUser) {
+      return res.status(404).json({ msg: "Usuario nao encontrado." });
+    }
+
+    const editUser = await User.updateOne(
+      { _id: loggedUser._id },
+      { ...req.body },
+      { new: true }
+    );
+
+    delete editUser._doc.passwordHash;
+    delete editUser._doc.__v;
+
+    return res.status(200).json(editUser);
+  } catch (error) {
+    return res.status(500).json({ msg: error.message });
+  }
+});
+
 export default userRouter;
